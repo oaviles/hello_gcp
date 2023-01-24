@@ -1,0 +1,39 @@
+name: 3 Deploy Microservice to GKE
+
+on: workflow_dispatch
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  GKE_LOCATION: us-central1 # TODO: update region of the Artifact Registry
+  GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
+  GKE_ZONE: us-central1-c   # TODO: update to cluster zone
+  DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
+  REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
+  IMAGE: oaapi
+  LATEST_TAG: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
+
+jobs:
+  deploy-api-gke:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    environment: poc
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Alternative option - authentication via credentials json
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_LOCATION }}
+
+    # The KUBECONFIG env var is automatically exported and picked up by kubectl.
+    - id: 'get-nodes'
+      run: 'kubectl get no'
