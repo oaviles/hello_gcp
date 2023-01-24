@@ -22,6 +22,7 @@ env:
   DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
   REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
   IMAGE: oaapi
+  LATEST_TAG: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
 
 jobs:
   setup-build-publish-deploy:
@@ -63,7 +64,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: us-central1-docker.pkg.dev/oa-project-320014/{{ env.REPOSITORY }}/oaapi:latest  
+        tags: ${{ env.LATEST_TAG }}  
   
   #  - name: Deploy
   #    run: |-
