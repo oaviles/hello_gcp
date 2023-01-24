@@ -40,10 +40,11 @@ resource "google_cloud_run_service" "default" {
   }
 }
 
-resource "google_cloud_run_service_iam_member" "member" {
+resource "google_cloud_run_service_iam_binding" "default" {
   location = google_cloud_run_service.default.location
-  project = google_cloud_run_service.default.project
-  service = var.cloudrun_name
-  role = "roles/viewer"
-  member = "allUsers"
+  service  = google_cloud_run_service.default.name
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
 }
