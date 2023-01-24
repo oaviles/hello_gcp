@@ -1,0 +1,40 @@
+name: Reusable Workflow
+
+on:
+  workflow_call:
+    secrets:
+      gcpCredentials:
+        required: true
+      clusterName:
+        required: true
+      gkeLocation:
+        required: true
+      projectName:
+        required: true
+
+jobs:
+  update-aks:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@main
+
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.gcpCredentials }}'
+
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: ${{ secrets.clusterName }}
+        location: ${{ env.gkeLocation}}
+    
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    # Now you can run gcloud commands authenticated as the impersonated service account.
+    - id: 'gcloud-command'
+      name: 'gcloud version'
+      run: |-
+        gcloud version
