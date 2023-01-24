@@ -29,8 +29,7 @@ resource "google_cloud_run_service" "default" {
   template {
     spec {
       containers {
-        # image = "us-docker.pkg.dev/cloudrun/container/hello"
-        image = "oaviles/netcoreangularapp:latest"
+         image = "us-docker.pkg.dev/cloudrun/container/hello"
       }
     }
   }
