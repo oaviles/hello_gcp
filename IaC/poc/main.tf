@@ -16,8 +16,8 @@ provider "google" {
 }
 
 resource "google_artifact_registry_repository" "my-repo" {
-  location      = "us-central1"
-  repository_id = "my-repository"
+  location      = var.gcp_region
+  repository_id = var.gar_name
   description   = "example docker repository"
   format        = "DOCKER"
 }
