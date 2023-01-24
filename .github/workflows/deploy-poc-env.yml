@@ -2,143 +2,119 @@ name: 0 Deploy PoC Env
 
 on:
   workflow_dispatch:
-  
+
 env:
-  image_name: oapi
-  tag: 7999
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  GAR_LOCATION: us-central1 # TODO: update region of the Artifact Registry
+  GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
+  GKE_ZONE: us-central1-c   # TODO: update to cluster zone
+  DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
+  REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
+  IMAGE: oaapi
+  LATEST_TAG: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  create-resource-group:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    steps:
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+  
+  deploy-env-poc:
+     name: "Deploy GKE IaC"
+     runs-on: ubuntu-latest
+     defaults:
+      run:
+        working-directory: "./IaC"
+    
+     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Create Azure RG
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          az group create --location ${{ secrets.AZURE_REGION }} --name ${{ secrets.AZURE_RG }}
-          
-  create-acr:
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: create-resource-group
-    steps:
-    - uses: actions/checkout@main
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Create ACR
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az acr create --resource-group ${{ secrets.AZURE_RG }} --name ${{ secrets.ACR_NAME }} --sku Basic        
-  build-and-push-image:
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: [enable-observability,create-acr]
-    steps:
-    - uses: actions/checkout@main
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Build and Push Image
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az acr build -t ${{ secrets.ACR_NAME }}.azurecr.io/${{ env.image_name }}:${{ env.tag }} -r ${{ secrets.ACR_NAME }} .
-  deploy-aks:
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: [create-resource-group]
-    steps:
-    - uses: actions/checkout@main
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          # terraform_version: 0.13.0:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-    - name: Deploy AKS
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-        resourceGroupName: ${{ secrets.AZURE_RG }}
-        template: ./IaC/azuredeploy.json
-        parameters: ./IaC/azuredeploy.parameters.json
-        
-        
-  update-aks:
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: [enable-observability,create-acr]
-    steps:
-    - uses: actions/checkout@main
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Udpate AKS with ACR
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az aks update -g ${{ secrets.AZURE_RG }} -n ${{ secrets.CLUSTER_NAME }} --attach-acr ${{ secrets.ACR_NAME }}
-          
-          
-  enable-observability:
-    runs-on: ubuntu-latest
-    if: ${{ success() }}
-    needs: [deploy-aks]
-    steps:
-    - uses: actions/checkout@main
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Enable Observability
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az resource create --resource-type Microsoft.OperationalInsights/workspaces --name ${{ secrets.WORKSPACE_NAME }} --resource-group ${{ secrets.AZURE_RG }} --location ${{ secrets.AZURE_REGION }} --properties '{}' -o table
-          WORKSPACE_ID=$(az resource show --resource-type Microsoft.OperationalInsights/workspaces --resource-group ${{ secrets.AZURE_RG }} --name ${{ secrets.WORKSPACE_NAME }} --query "id" -o tsv)
-          echo $WORKSPACE_ID
-          az aks enable-addons --resource-group ${{ secrets.AZURE_RG }} --name ${{ secrets.CLUSTER_NAME }} --addons monitoring --workspace-resource-id $WORKSPACE_ID
-  deploy-microservice:
-    runs-on: ubuntu-latest
-    environment:
-      name: PoC
-    if: ${{ success() }}
-    needs: [update-aks,build-and-push-image]
-    steps:
-    - uses: actions/checkout@master
-    - uses: Azure/aks-set-context@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS }}'
-        cluster-name: ${{ secrets.CLUSTER_NAME }}
-        resource-group: ${{ secrets.AZURE_RG }}
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -recursive
 
-    - uses: Azure/k8s-deploy@v1.4
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+  
+  build-push-image:
+    name: Build and Push Image
+    if: ${{ success() }}
+    needs: [deploy-env-poc]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Alternative option - authentication via credentials json
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
       with:
-        namespace: 'api'
-        manifests: |
-          yaml_files/deploy-microservice.yaml
-          yaml_files/hpa-api.yaml
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Login to GAR
+      uses: docker/login-action@v1
+      with:
+        registry: us-centra1-docker.pkg.dev
+        username: _json_key
+        password: ${{ secrets.GCP_CREDENTIALS }}
+          
+    - name: Build and push to GAR
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ${{ env.LATEST_TAG }} 
+  
+    
+  deploy-api-gke:
+    name: Deploy API to GKE
+    if: ${{ success() }}
+    needs: [build-push-image]
+    runs-on: ubuntu-latest
+    environment: poc
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Alternative option - authentication via credentials json
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_LOCATION }}
+
+    # The KUBECONFIG env var is automatically exported and picked up by kubectl.
+    - id: 'deploy-microservice'
+      run: 'kubectl apply -f yaml_files/deploy-microservice.yaml'
+      
+    - id: 'config-hpa'
+      run: 'kubectl apply -f yaml_files/hpa-api.yaml'
           
           
   create-issue:
     runs-on: ubuntu-latest
     if: ${{ failure() }}
-    needs: [deploy-microservice]
+    needs: [deploy-api-gke]
     steps:
       - name: create-issue
         uses: oaviles/issue_action@v1
