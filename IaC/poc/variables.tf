@@ -13,3 +13,9 @@ variable "gcp_region" {
   type        = string
   default     = "us-central1" #us-west1
 }
+
+variable "cloudrun_name" {
+  description = "GCP region where resource will be created"
+  type        = string
+  default     = "us-central1" #us-west1
+}
