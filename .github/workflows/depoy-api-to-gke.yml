@@ -10,7 +10,7 @@
 #
 # For more support on how to run the workflow, please visit https://github.com/google-github-actions/setup-gcloud/tree/master/example-workflows/gke-kustomize
 
-name: 2 Build and Push Image to GKE
+name: 2 Build and Push Image to GAR
 
 on: workflow_dispatch
 
@@ -25,8 +25,8 @@ env:
   LATEST_TAG: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
 
 jobs:
-  setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+  build-push-image:
+    name: Build and Push Image
     runs-on: ubuntu-latest
     environment: production
 
