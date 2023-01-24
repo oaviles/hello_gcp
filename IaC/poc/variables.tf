@@ -15,7 +15,13 @@ variable "gcp_region" {
 }
 
 variable "cloudrun_name" {
-  description = "GCP region where resource will be created"
+  description = "Cloud Run Service Name"
   type        = string
-  default     = "us-central1" #us-west1
+  default     = "oacloudrun01" #us-west1
+}
+
+variable "gar_name" {
+  description = "Google Artifact Registry Service Name"
+  type        = string
+  default     = "oagar01" #us-west1
 }
