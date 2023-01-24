@@ -3,7 +3,7 @@ terraform {
     # hostname     = "app.terraform.io"
     organization = "personal-mobile"
     workspaces {
-      name = "github-action-gke"
+      name = "hello_gcp"
     }
   }
 }
