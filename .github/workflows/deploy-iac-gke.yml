@@ -1,0 +1,40 @@
+name: "1 Deploy GKE (IaC)"
+
+on: workflow_dispatch
+
+jobs:
+  Terraform-Plan:
+    #env:
+       #GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  
+    name: "Deploy GKE IaC"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "./IaC"
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          # terraform_version: 0.13.0:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -recursive
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
