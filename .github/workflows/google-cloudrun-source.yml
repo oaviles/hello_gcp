@@ -78,8 +78,8 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          # NOTE: If required, update to the appropriate source folder
-          source: .
+          # NOTE: If required, update to the appropriate image path
+          image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
