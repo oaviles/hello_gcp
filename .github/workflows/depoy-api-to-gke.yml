@@ -21,7 +21,7 @@ env:
   GKE_ZONE: us-central1-c   # TODO: update to cluster zone
   DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
   REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
-  IMAGE: oapi
+  IMAGE: oaapi
 
 jobs:
   setup-build-publish-deploy:
@@ -63,7 +63,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: us-central1-docker.pkg.dev/oa-project-320014/oaviles/oaapi:$GITHUB_SHA   
+        tags: us-central1-docker.pkg.dev/oa-project-320014/{{ env.REPOSITORY }}/oaapi:latest  
   
   #  - name: Deploy
   #    run: |-
