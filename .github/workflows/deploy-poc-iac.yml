@@ -7,7 +7,7 @@ jobs:
     #env:
        #GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
   
-    name: "Deploy GKE IaC"
+    name: "Deploy PoC Env"
     runs-on: ubuntu-latest
     defaults:
       run:
