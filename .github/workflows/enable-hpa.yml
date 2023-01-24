@@ -1,20 +1,38 @@
-on: [workflow_dispatch]
-name: 4 Enable HPA on API
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-      
-    # Set the target AKS cluster.
-    - uses: Azure/aks-set-context@v1
-      with:
-        creds: '${{ secrets.AZURE_CREDENTIALS_SUPER_SP }}'
-        cluster-name: ${{ secrets.CLUSTER_NAME }}
-        resource-group: ${{ secrets.AZURE_RG }}
+name: Enable HPA
 
-    - uses: Azure/k8s-deploy@v1.4
+on: workflow_dispatch
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  GKE_LOCATION: us-central1 # TODO: update region of the Artifact Registry
+  GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
+  GKE_ZONE: us-central1-c   # TODO: update to cluster zone
+  DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
+  REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
+  IMAGE: oaapi
+  LATEST_TAG: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/oaviles/oaapi:latest 
+
+jobs:
+  deploy-api-gke:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    environment: poc
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Alternative option - authentication via credentials json
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
       with:
-        namespace: 'api'
-        manifests: |
-          yaml_files/hpa-api.yaml
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_LOCATION }}
+      
+    - id: 'enable-hpa'
+      run: 'kubectl apply -f yaml_files/hpa-api.yaml'
