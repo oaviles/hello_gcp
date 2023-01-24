@@ -67,6 +67,11 @@ jobs:
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
+      - name: Deploy Cloud Run
+        id: dd
+        run: |
+          gcloud run deploy oacloudrun01 --source .
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
