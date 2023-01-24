@@ -1,4 +1,4 @@
-name: 0 Deploy GKE Env
+name: 0 Deploy Microservice Env
 
 on:
   workflow_dispatch:
