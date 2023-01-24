@@ -3,7 +3,7 @@
 This is a collection of sample projects for Cloud Application Developer using Google Cloud Platform. The sample projects are arranged in different topics about microservice development and deployment on Google Kubernetes Engine and Cloud Run supported by Secure DevOps Practices.
 
 Deploy Microservice on Google Kubernetes Engine, reference architecture:
-[Deploy microservice on GKE]([)](https://id.cloud-ace.com/architecture-scalable-commerce-workloads-using-microservices/)
+[Deploy microservice on GKE](https://id.cloud-ace.com/architecture-scalable-commerce-workloads-using-microservices/)
 ![](https://cloud.google.com/architecture/images/scaling-commerce-workloads-deployment-microservices-kubernetes.svg)
 
 #### Other Resources
