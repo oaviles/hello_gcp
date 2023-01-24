@@ -5,7 +5,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
-  GAR_LOCATION: us-central1 # TODO: update region of the Artifact Registry
+  GCP_LOCATION: us-central1 # TODO: update region of the Artifact Registry
   GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
   GKE_ZONE: us-central1-c   # TODO: update to cluster zone
   DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
@@ -101,7 +101,7 @@ jobs:
       uses: 'google-github-actions/get-gke-credentials@v1'
       with:
         cluster_name: ${{ env.GKE_CLUSTER }}
-        location: ${{ env.GKE_LOCATION }}
+        location: ${{ env.GCP_LOCATION }}
 
     # The KUBECONFIG env var is automatically exported and picked up by kubectl.
     - id: 'deploy-microservice'
