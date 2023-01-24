@@ -70,7 +70,7 @@ jobs:
       - name: Deploy Cloud Run
         id: dd
         run: |
-          gcloud run deploy oacloudrun01 --source .
+          gcloud run deploy oacloudrun01 --region ${{ env.REGION }} --source .
 
       - name: Deploy to Cloud Run
         id: deploy
