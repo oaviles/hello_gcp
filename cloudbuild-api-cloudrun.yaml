@@ -1,0 +1,35 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'us-central1-docker.pkg.dev/${PROJECT_ID}/oagar01/oapi:latest', '.']
+  id: 'build-image-oapi'
+  waitFor: ['-']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/${PROJECT_ID}/oagar01/oapi:latest']
+  id: 'push-image-oapi'
+  waitFor: ['build-image-oapi']
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - 'oapi'
+  - '--image'
+  - 'us-central1-docker.pkg.dev/${PROJECT_ID}/oagar01/oapi:latest'
+  - '--region'
+  - 'us-central1'
+  - '--platform'
+  - 'managed'
+  - '--cpu'
+  - '1'
+  - '--min-instances'
+  - '0'
+  - '--max-instances'
+  - '3'
+  - '--port'
+  - '7999'
+  - '--ingress'
+  - 'all'
+  - '--allow-unauthenticated'
+  waitFor: ['push-image-oapi']
+  id: 'deploy-to-cloudrun'
+images:
+- 'us-central1-docker.pkg.dev/${PROJECT_ID}/oagar01/oapi:latest'
