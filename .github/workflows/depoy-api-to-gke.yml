@@ -10,7 +10,7 @@
 #
 # For more support on how to run the workflow, please visit https://github.com/google-github-actions/setup-gcloud/tree/master/example-workflows/gke-kustomize
 
-name: 2 Build and Deploy API to GKE
+name: 2 Build and Push Image to GKE
 
 on: workflow_dispatch
 
@@ -65,11 +65,4 @@ jobs:
       with:
         push: true
         tags: ${{ env.LATEST_TAG }}  
-  
-  #  - name: Deploy
-  #    run: |-
-  #      # replacing the image name in the k8s template
-  #      ./kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
-  #      ./kustomize build . | kubectl apply -f -
-  #      kubectl rollout status deployment/$DEPLOYMENT_NAME
-  #      kubectl get services -o wide
+
