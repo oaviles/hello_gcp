@@ -21,7 +21,7 @@ spec:
         app: api
     spec:
       containers:
-      - image: acraksworkshop.azurecr.io/oapi:7999
+      - image: us-central1-docker.pkg.dev/oa-project-320014/oaviles/oaapi:latest
         name: api
         imagePullPolicy: Always
         ports:
