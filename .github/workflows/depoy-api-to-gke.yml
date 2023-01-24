@@ -15,7 +15,7 @@ name: 2 Build and Deploy API to GKE
 on: workflow_dispatch
 
 env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   GAR_LOCATION: us-central1 # TODO: update region of the Artifact Registry
   GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
   GKE_ZONE: us-central1-c   # TODO: update to cluster zone
@@ -63,7 +63,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/{{ env.REPOSITORY }}/{{ env.IMAGE }}:$GITHUB_SHA  
+        tags: us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA  
   
   #  - name: Deploy
   #    run: |-
