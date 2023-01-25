@@ -1,4 +1,4 @@
-name: "1 Deploy PoC Env (IaC)"
+name: "1.1 Deploy PoC Env (IaC)"
 
 on: workflow_dispatch
 
