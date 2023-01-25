@@ -44,7 +44,7 @@
 
 # Reference: https://blog.leandrotoledo.org/deploying-google-cloud-run-using-github-actions-and-workload-identity-authentication/
 
-name: Deploy Microservice to Cloud Run
+name: 2.1 Deploy Microservice to Cloud Run
 
 on: workflow_dispatch
 
