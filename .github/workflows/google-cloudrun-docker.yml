@@ -44,9 +44,7 @@
 
 name: Deploy Microservice to Cloud Run
 
-on:
-  push:
-    branches: [ "master" ]
+on: workflow_dispatch
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }} # TODO: update Google Cloud project id
