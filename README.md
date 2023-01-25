@@ -12,6 +12,7 @@ Deploy Microservice on Google Kubernetes Engine, reference architecture:
 - [.NET CLI to build webapi](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new-sdk-templates#webapi)
 - [Docker in Visual Studio Code](https://code.visualstudio.com/docs/containers/overview)
 - [Dockerize an ASP.NET Core application](https://docs.docker.com/samples/dotnetcore/)
+- [Cloud Tools for Visual Studio](https://cloud.google.com/tools/visual-studio/docs/)
 
 ### Check More DevSquad Projects
 * [DevSquad Main Project](https://github.com/microsoft/fast-prototyping)
