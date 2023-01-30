@@ -4,6 +4,6 @@ provider "google" {
 }
 
 resource "google_storage_bucket" "bucket" {
-  name     = "oa-content-bucket"
+  name     = "oa-lab-bucket"
   location = "US"
 }
