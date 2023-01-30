@@ -36,7 +36,7 @@ jobs:
       - name: Terreform Plan
         run: |
           cd IaC/Storage
-          cat >> terraform.tfvars << EOF project="${{ env.GCP_PROJECT }}" EOF
+          echo project="${{ env.GCP_PROJECT }}" >> terraform.tfvars
           terraform plan
           env: 
             GOOGLE_CREDENTIALS ${{ secrets.GCP_CREDENTIALS }}
