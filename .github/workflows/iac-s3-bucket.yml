@@ -19,6 +19,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
+      
+      - name: GCP Authetication
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       # Runs a single command using the runners shell
       - name: Install Terraform
@@ -37,8 +42,6 @@ jobs:
         run: |
           cd IaC/Storage
           terraform plan -var="project=${{ secrets.GCP_PROJECT }}"
-          env: 
-            GOOGLE_CREDENTIALS ${{ secrets.GCP_CREDENTIALS }}
             
           
             
