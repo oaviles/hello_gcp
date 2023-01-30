@@ -44,7 +44,7 @@ jobs:
           
       - name: Terreform Apply
         run: |
-          terraform -chdir=IaC/Storage apply -var="project=${{ secrets.GCP_PROJECT }}"
+          terraform -chdir=IaC/Storage apply -var="project=${{ secrets.GCP_PROJECT }}" -auto-approve
             
           
             
