@@ -37,7 +37,11 @@ jobs:
         run: |
           cd IaC/Storage
           terraform plan
-          env: GOOGLE_CREDENTIALS ${{ secrets.GCP_CREDENTIALS }}
+          env: 
+            GOOGLE_CREDENTIALS ${{ secrets.GCP_CREDENTIALS }}
+            project: ${{ secrets.GCP_PROJECT }}
+            
+          
             
           
       
