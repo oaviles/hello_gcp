@@ -4,8 +4,8 @@ name: Lab about IaC S3 Bucket
 # Controls when the workflow will run
 on: workflow_dispatch
 
-# env:
-#    GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+env:
+  PROJECT: ${{ secrets.GCP_PROJECT }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -36,10 +36,10 @@ jobs:
       - name: Terreform Plan
         run: |
           cd IaC/Storage
+          cat >> terraform.tfvars << EOF project="${{ env.GCP_PROJECT }}" EOF
           terraform plan
           env: 
             GOOGLE_CREDENTIALS ${{ secrets.GCP_CREDENTIALS }}
-            project: ${{ secrets.GCP_PROJECT }}
             
           
             
