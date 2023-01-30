@@ -40,7 +40,10 @@ jobs:
           
       - name: Terreform Plan
         run: |
-          cd IaC/Storage
+          terraform plan -var="project=${{ secrets.GCP_PROJECT }}"
+          
+      - name: Terreform Apply
+        run: |
           terraform plan -var="project=${{ secrets.GCP_PROJECT }}"
             
           
