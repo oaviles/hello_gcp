@@ -21,7 +21,7 @@ spec:
         app: api
     spec:
       containers:
-      - image: us-central1-docker.pkg.dev/your-gcp-projectid/oaviles/oaapi:latest
+      - image: us-central1-docker.pkg.dev/your-gcp-projectid/oagar01/oacloudrun01:latest
         name: api
         imagePullPolicy: Always
         ports:
