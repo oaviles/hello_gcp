@@ -13,6 +13,7 @@ Deploy Microservice on Google Kubernetes Engine, reference architecture:
 - [Docker in Visual Studio Code](https://code.visualstudio.com/docs/containers/overview)
 - [Dockerize an ASP.NET Core application](https://docs.docker.com/samples/dotnetcore/)
 - [Cloud Tools for Visual Studio](https://cloud.google.com/tools/visual-studio/docs/)
+- [Authenticate to Google Cloud](https://github.com/marketplace/actions/authenticate-to-google-cloud)
 
 ### Check More DevSquad Projects
 * [DevSquad Main Project](https://github.com/microsoft/fast-prototyping)
