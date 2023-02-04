@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: "./IaC"
+        working-directory: "./IaC/GKE"
     
     steps:
       - name: Checkout
