@@ -12,7 +12,7 @@ provider "google" {
   #credentials = "${file("${var.credentials}")}"
   credentials = var.gcpcredentials
   project     = var.gcp_project_id
-  region      = "us-central1"
+  region      = var.gcp_region
 }
 
 
@@ -36,7 +36,7 @@ resource "google_compute_network" "vpc" {
 # Subnet
 resource "google_compute_subnetwork" "subnet" {
   name          = "${var.gcp_project_id}-subnet"
-  region        = "us-central1"
+  region        = var.gcp_region
   network       = google_compute_network.vpc.name
   ip_cidr_range = "10.10.0.0/24"
 }
