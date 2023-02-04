@@ -18,6 +18,9 @@ resource "google_container_cluster" "arcdemo" {
   name     = var.gke_cluster_name
   location = var.gcp_region
   
+  ip_allocation_policy {
+  }
+  
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
   
