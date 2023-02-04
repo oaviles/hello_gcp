@@ -7,7 +7,7 @@ jobs:
   # ------- Main Orchestration  ---------------
   
   IaC:
-    uses: ./.github/workflows/deploy-aks-v2.yml
+    uses: ./.github/workflows/reusable-workflow.yml
     with:
       templateLocation: ./IaC/azuredeploy.json
       parametersLocation: ./IaC/azuredeploy.parameters.json
@@ -32,7 +32,7 @@ jobs:
   Config-ACR-and-AKS:
     if: ${{ success() }}
     needs: Test-AKS
-    uses: ./.github/workflows/update-aks_with_acr-v2.yml
+    uses: ./.github/workflows/reusable-workflow.yml
     secrets: 
       clusterName: ${{ secrets.CLUSTER_NAME }}
       azureCredentials: ${{ secrets.AZURE_CREDENTIALS_SUPER_SP }}
@@ -43,7 +43,7 @@ jobs:
   Deploy-Microservice:
     if: ${{ success() }}
     needs: Config-ACR-and-AKS
-    uses: ./.github/workflows/deploy-microservice-v2.yml
+    uses: ./.github/workflows/reusable-workflow.yml
     with:
       parametersNamespace: api
       ymlLocation: yaml_files/deploy-microservice.yaml
@@ -55,7 +55,7 @@ jobs:
   Enable-HPA:
     if: ${{ success() }}
     needs: Deploy-Microservice
-    uses: ./.github/workflows/enable-hpa-v2.yml
+    uses: ./.github/workflows/reusable-workflow.yml
     with:
       parametersNamespace: api
       ymlLocation: yaml_files/hpa-api.yaml
