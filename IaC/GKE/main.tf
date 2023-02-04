@@ -36,5 +36,5 @@ resource "google_compute_subnetwork" "subnet" {
   name          = "${var.gcp_project_id}-subnet"
   region        = var.gcp_region
   network       = google_compute_network.vpc.name
-  ip_cidr_range = "/14"
+  ip_cidr_range = "10.96.0.0/14"
 }
