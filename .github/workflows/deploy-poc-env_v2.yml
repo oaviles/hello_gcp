@@ -1,0 +1,142 @@
+name: 4 Deploy Microservice Env V2
+
+on:
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  GCP_LOCATION: us-central1 # TODO: update region of the Artifact Registry
+  GKE_CLUSTER: gkecluster-demo    # TODO: update to cluster name
+  GKE_ZONE: us-central1-c   # TODO: update to cluster zone
+  DEPLOYMENT_NAME: oapi-test # TODO: update to deployment name
+  REPOSITORY: oaviles # TODO: update to Artifact Registry docker repository
+  GAR: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}
+  IMAGE: oaapi
+  LATEST_TAG: latest 
+  SERVICE: oagar01
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  
+  deploy-env-poc:
+     name: "Deploy GKE IaC"
+     runs-on: ubuntu-latest
+     defaults:
+      run:
+        working-directory: "./IaC/Autopilot"
+    
+     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          # terraform_version: 0.13.0:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Format
+        id: fmt
+        run: terraform fmt -recursive
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+  
+  build-push-image:
+    name: Build and Push Image
+    if: ${{ success() }}
+    needs: [deploy-env-poc]
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Google Auth
+        id: auth
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      # NOTE: Alternative option - authentication via credentials json
+      # - name: Google Auth
+      #   id: auth
+      #   uses: 'google-github-actions/auth@v0'
+      #   with:
+      #     credentials_json: '${{ secrets.GCP_CREDENTIALS }}''
+
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
+
+      # Authenticate Docker to Google Cloud Artifact Registry
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
+        with:
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: '${{ env.GCP_LOCATION }}-docker.pkg.dev'
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ env.GCP_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/oagar01/${{ env.IMAGE }}:${{ env.LATEST_TAG }}" ./
+          docker push "${{ env.GAR }}/${{ env.SERVICE }}/${{ env.IMAGE }}:${{ env.LATEST_TAG }}"
+  
+    
+  deploy-api-gke:
+    name: Deploy API to GKE
+    if: ${{ success() }}
+    needs: [build-push-image]
+    runs-on: ubuntu-latest
+    environment: poc
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Alternative option - authentication via credentials json
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - id: 'get-credentials'
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GCP_LOCATION }}
+
+    # The KUBECONFIG env var is automatically exported and picked up by kubectl.
+    - id: 'deploy-microservice'
+      run: 'kubectl apply -f yaml_files/deploy-microservice.yaml'
+      
+    - id: 'config-hpa'
+      run: 'kubectl apply -f yaml_files/hpa-api.yaml'
+          
+          
+  create-issue:
+    runs-on: ubuntu-latest
+    if: ${{ failure() }}
+    needs: [deploy-api-gke]
+    steps:
+      - name: create-issue
+        uses: oaviles/issue_action@v1
+        with:
+          issue-title: "Deployment Failure: PoC Env - ${{ github.sha }}"
+          issue-body: "Validate orchestration workflow"
+          repo-token: ${{secrets.GITHUB_TOKEN}}       
